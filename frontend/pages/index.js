@@ -82,7 +82,70 @@ export default function Home() {
         signer
       );
       const value = amount * 0.001;
-      const address = signer.getAddress();
+      const tx = await tokenContract.mint(amount, {
+        value: utils.parseEther(value.toString()),
+      });
+      setLoading(true);
+      await tx.wait();
+      setLoading(false);
+      window.alert("Succesfully minted Crypto Dev Tokens");
+      await getBalanceOfCryptoDevTokens();
+      await getTotalTokensMinted();
+      await getTokensToBeMinted();
+    } catch (err) {
+      console.error(err);
     }
+  };
+
+  // claimCryptoDevTokens: help the user claim  Crypto Dev Tokens
+  const claimCryptoDevTokens = async () => {
+    try {
+      const signer = await getSignerOrProvider(true);
+      const tokenContract = new Contract(
+        TOKEN_CONTRACT_ADDRESS,
+        TOKEN_CONTRACT_ABI,
+        signer
+      );
+      const tx = await tokenContract.claim();
+      setLoading(true);
+      await tx.wait();
+      setLoading(false);
+      window.alert("Succesfully claimed Crypto Dev Tokens");
+      await getBalanceOfCryptoDevTokens();
+      await getTotalTokensMinted();
+      await getTokensToBeMinted();
+    } catch (err) {
+      console.error(err);
+    }
+ }
+// getTotalTokensMinted: retrieves how many tokens have been minted till now out of the totalSupply
+const getTotalTokensMinted = async () => {
+  try {
+    const provider = await getSignerOrProvider();
+    const tokenContract = new Contract(
+      TOKEN_CONTRACT_ADDRESS,
+      TOKEN_CONTRACT_ABI,
+      provider
+    )
+    const _tokensMinted = await tokenContract.totalSupply();
+    setTokensMinted(_tokensMinted);
+  } catch (err) {
+    console.error(err);
   }
-} 
+}
+const getSignerOrProvider = async (needSigner = false) => {
+  const provider = await web3ModalRef.current.connect();
+  const web3Provider = new providers.Web3Provider(provider);
+  const { chainId } = await web3Provider.getNetwork();
+  if (chainId !== 4) {
+    window.alert("change the network to rinkeby");
+    throw new Error("change the network to rinkeby");
+  }
+  if (needSigner) {
+    const signer = web3Provider.getSigner();
+    return signer;
+  }
+  return web3Provider
+}
+
+}
