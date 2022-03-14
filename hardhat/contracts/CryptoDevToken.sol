@@ -24,7 +24,7 @@ contract CryptoDevToken is ERC20, Ownable {
        * Requirements:
        * - `msg.value` should be equal or greater than the tokenPrice * amount
        */
-
+	
 	function mint(uint256 amount) public payable {
 		uint256 _requiredAmount = tokenPrice * amount;
 		require(msg.value >= _requiredAmount, "Ether sent is incorrect");
